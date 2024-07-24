@@ -15,7 +15,6 @@ ABCIグループ単位で共有利用できるMLflow Serverが作成済みであ
 1. [OnDemand](https://ood-portal.abci.ai/)にアクセスします。
     * ABCIアカウントでログインします。OTPの入力も必要です。 
 1. `[AI Hub]` - `[MLflow Server]` を選択します。
-1. App for MLflow Server画面で`Service List Update`ボタンをクリックします。
 1. 対象ServiceのURL(from outside ABCI)をクリックします。
 1. BASIC認証用のユーザ名とパスワードを入力します。
 1. MLflowのUIを確認します。
@@ -33,7 +32,7 @@ MLWFツールインストール用のPythonの仮想環境(仮想環境名: mlwf
 [username@es1 aihub]$ module load python/3.11
 [username@es1 aihub]$ python3 -m venv venv/mlwf
 [username@es1 aihub]$ source venv/mlwf/bin/activate
-(mlwf) [username@es1 aihub]$ cp -pr /apps/aihub/source/abci_mlwf .
+(mlwf) [username@es1 aihub]$ cp -pr /apps/aihub/abci_mlwf .
 (mlwf) [username@es1 aihub]$ pip install ./abci_mlwf/
 ```
 
@@ -51,7 +50,8 @@ ABCIのインタラクティブジョブを実行し、計算ノードの利用�
 
 ```
 [username@g0001 ~]$ cd aihub
-[username@g0001 aihub]$ python3.8 -m venv venv/work
+[username@g0001 aihub]$ module load python/3.11
+[username@g0001 aihub]$ python3 -m venv venv/work
 [username@g0001 aihub]$ source venv/work/bin/activate
 (work) [username@g0001 aihub]$ pip install mlflow[extras]
 (work) [username@g0001 aihub]$ pip install --upgrade pip
@@ -78,6 +78,8 @@ MLflowのサンプルプログラム(mlflow)を`git clone`します。
 
 以下の例では、train.pyプログラムを2つにパイパーパラメータalphaとl1_ratioを引数に設定し、2度実行しています。出力された`Model name`と`version`を覚えておきます。
 
+学習処理の実行例)
+
 ```
 (work) [username@g0001 aihub]$ git clone https://github.com/mlflow/mlflow
 (work) [username@g0001 aihub]$ cd mlflow/examples
@@ -87,8 +89,8 @@ Elasticnet model (alpha=1.000000, l1_ratio=1.000000):
   MAE: 0.672504249193216
   R2: 0.017246911564584355
 Registered model 'ElasticnetWineModel' already exists. Creating a new version of this model...
-2024/05/14 11:13:41 INFO mlflow.store.model_registry.abstract_store: Waiting up to 300 seconds for model version to finish creation. Model name: ElasticnetWineModel, version 21
-Created version '21' of model 'ElasticnetWineModel'.
+2024/07/24 13:57:09 INFO mlflow.store.model_registry.abstract_store: Waiting up to 300 seconds for model version to finish creation. Model name: ElasticnetWineModel, version 32
+Created version '32' of model 'ElasticnetWineModel'.
 
 (work) [username@g0001 examples]$ python sklearn_elasticnet_wine/train.py 0.1 0.2
 Elasticnet model (alpha=0.100000, l1_ratio=0.200000):
@@ -96,8 +98,8 @@ Elasticnet model (alpha=0.100000, l1_ratio=0.200000):
   MAE: 0.5525324524014098
   R2: 0.26518433811823017
 Registered model 'ElasticnetWineModel' already exists. Creating a new version of this model...
-2024/05/14 11:14:09 INFO mlflow.store.model_registry.abstract_store: Waiting up to 300 seconds for model version to finish creation. Model name: ElasticnetWineModel, version 22
-Created version '22' of model 'ElasticnetWineModel'.
+2024/07/24 13:57:42 INFO mlflow.store.model_registry.abstract_store: Waiting up to 300 seconds for model version to finish creation. Model name: ElasticnetWineModel, version 33
+Created version '33' of model 'ElasticnetWineModel'.
 ```
 
 !!! note
@@ -129,7 +131,7 @@ MLflowのUIの[Experiments]メニューから、Experiments毎やRun毎のハイ
 (mlwf) [username@es1 aihub]$ export MLFLOW_TRACKING_USERNAME="BASIC_USERNAME"
 (mlwf) [username@es1 aihub]$ export MLFLOW_TRACKING_PASSWORD="BASIC_PASSWORD"
 (mlwf) [username@es1 aihub]$ export MLFLOW_S3_ENDPOINT_URL="https://s3.abci.ai"
-(mlwf) [username@es1 aihub]$ mlwf_export_model --model-registry-url="http://＜コンテナ管理サーバのIPアドレス＞:＜ポート番号＞/mlflow/" --model-name="ElasticnetWineModel" --model-version="20" --stacktrace
+(mlwf) [username@es1 aihub]$ mlwf_export_model --model-registry-url="http://＜コンテナ管理サーバのIPアドレス＞:＜ポート番号＞/mlflow/" --model-name="ElasticnetWineModel" --model-version="32" --stacktrace
 ```
 
 | オプション | 説明 |
@@ -144,11 +146,11 @@ MLflowのUIの[Experiments]メニューから、Experiments毎やRun毎のハイ
 抽出したファイルの確認例)
 
 ```
-(mlwf) [username@es-a2 aihub]$ ls -go MLWFExportModel_20240514112206/
+(mlwf) [username@es-a2 aihub]$ ls -go MLWFExportModel_20240724140146/
 total 5
-drwxr-x--- 3 4096 May 14 11:22 artifacts
--rw-r----- 1 3189 May 14 11:22 info.yaml
--rw-r----- 1 1799 May 14 11:22 model.tar.gz
+drwxr-x--- 3 4096 Jul 24 14:01 artifacts
+-rw-r----- 1 3167 Jul 24 14:01 info.yaml
+-rw-r----- 1 1614 Jul 24 14:01 model.tar.gz
 ```
 
 | 項目 | 説明 |
@@ -166,11 +168,11 @@ ABCIデータセットへの学習済みモデルの登録例)
 ```
 (mlwf) [username@es1 aihub]$ module load aws-cli
 (mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 mb s3://mlwf-examples/sklearn_elasticnet_wine
-(mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 cp MLWFExportModel_20240514112206/model.tar.gz s3://mlwf-examples/sklearn_elasticnet_wine/
-upload: MLWFExportModel_20240514112206/model.tar.gz to s3://mlwf-examples/sklearn_elasticnet_wine/model.tar.gz
+(mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 cp MLWFExportModel_20240724140146/model.tar.gz s3://mlwf-examples/sklearn_elasticnet_wine/
+upload: MLWFExportModel_20240724140146/model.tar.gz to s3://mlwf-examples/sklearn_elasticnet_wine/model.tar.gz
 
 (mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 ls s3://mlwf-examples/sklearn_elasticnet_wine/model.tar.gz
-2024-05-14 11:23:06       1799 model.tar.gz
+2024-07-24 14:04:12       1614 model.tar.gz
 ```
 
 ## 3. モデル利用フェーズ
@@ -183,26 +185,25 @@ ABCIデータセットに登録された学習済みモデルを実行するた�
 Singularityイメージファイルの作成例)
 
 ```
+[username@es1 ~]$ qrsh -g grpname -l rt_C.small=1 -l h_rt=1:00:00
+
 [username@es1 ~]$ cd aihub
-[username@es1 aihub]$ module load python/3.11 singularitypro/4.1.2
+[username@es1 aihub]$ module load python/3.11 singularitypro
 [username@es1 aihub]$ source venv/mlwf/bin/activate
 (mlwf) [username@es1 aihub]$ export PYTHONPATH=${PYTHONPATH}:"mlwf/lib/python3.11":"abci_mlwf"
 (mlwf) [username@es1 aihub]$ export MLFLOW_S3_ENDPOINT_URL="https://s3.abci.ai"
-(mlwf) [username@es1 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/sklearn_elasticnet_wine/model.tar.gz --base-container-url docker://nvcr.io/nvidia/pytorch:22.10-py3
+(mlwf) [username@es1 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/sklearn_elasticnet_wine/model.tar.gz --base-container-url docker://nvcr.io/nvidia/cuda:12.5.1-cudnn-devel-ubuntu22.04
 
 (snip)
 
 INFO:    Creating SIF file...
-INFO:    Build complete: ./MLWFCreateImage_20240514112424/container.simg
+INFO:    Build complete: ./MLWFCreateImage_20240724161319/container.simg
 ```
 
 | オプション | 説明 |
 |:--|:--|
 | --model-pkg-url | 学習済みモデルパッケージのURLを指定します。ローカルファイルのパスも指定可能です。 |
-| --base-container-url | ベースコンテナイメージのURLを指定します。イメージにはconda環境が必要です。 |
-
-!!! note
-    ベースコンテナイメージにはconda環境が含まれている必要があります。conda環境がない場合はイメージ作成に失敗します。
+| --base-container-url | ベースコンテナイメージのURLを指定します。 |
 
 作成されたSingularityイメージと学習済みモデルパッケージは`MLWFCreateImage_YYYYMMDDhhmmss`ディレクトリ配下に格納されます。  
 以下のとおり確認できます。
@@ -210,12 +211,12 @@ INFO:    Build complete: ./MLWFCreateImage_20240514112424/container.simg
 作成されたSingularityイメージの確認例)
 
 ```
-(mlwf) [username@es1 aihub]$ ls -goh MLWFCreateImage_20240514112424/
+(mlwf) [username@es1 aihub]$ ls -goh MLWFCreateImage_20240724161319/
 total 7.9G
--rwxr-x--- 1 7.9G May 14 11:31 container.simg
--rw-r----- 1  633 May 14 11:24 Dockerfile
-drwxr-x--- 3 4.0K May 14 11:24 model
--rw-r----- 1  693 May 14 11:24 Singularity
+-rwxr-x--- 1 4.8G Jul 24 16:20 container.simg
+-rw-r----- 1 1.4K Jul 24 16:13 Dockerfile
+drwxr-x--- 2 4.0K Jul 24 16:13 model
+-rw-r----- 1 1.8K Jul 24 16:13 Singularity
 ```
 
 | 項目 | 説明 |
@@ -234,8 +235,8 @@ Singularityコンテナの起動例)
 [username@es1 ~]$ qrsh -g grpname -l rt_C.small=1 -l h_rt=1:00:00
 
 [username@g0001 ~]$ cd aihub
-[username@g0001 aihub]$ module load singularitypro/4.1.2
-[username@g0001 aihub]$ singularity run MLWFCreateImage_20240514112424/container.simg
+[username@g0001 aihub]$ module load singularitypro
+[username@g0001 aihub]$ singularity shell MLWFCreateImage_20240724161319/container.simg
 ```
 
 `python --version`コマンドや`mlflow --version`コマンドで推論に必要なパッケージがインストールされた実行環境となっている事を確認します。
@@ -246,19 +247,18 @@ Singularityコンテナの起動例)
 
 ```
 Singularity> python --version
-Python 3.8.13
+Python 3.11.9
 
 Singularity> mlflow --version
-mlflow, version 2.12.2
+mlflow, version 2.14.3
 
-Singularity> ls -go MLWFCreateImage_20240514112424/model/
-total 24
--rw-r----- 1 1359 May 14 11:22 MLmodel
--rw-r----- 1  230 May 14 11:22 conda.yaml
-drwxr-x--- 2 4096 May 14 11:22 metadata
--rw-r----- 1  878 May 14 11:22 model.pkl
--rw-r----- 1  112 May 14 11:22 python_env.yaml
--rw-r----- 1  111 May 14 11:22 requirements.txt
+Singularity> ls -go MLWFCreateImage_20240724161319/model/
+total 20
+-rw-r----- 1 1359 Jul 24 14:01 MLmodel
+-rw-r----- 1  232 Jul 24 14:01 conda.yaml
+-rw-r----- 1  878 Jul 24 14:01 model.pkl
+-rw-r----- 1  106 Jul 24 14:01 python_env.yaml
+-rw-r----- 1  111 Jul 24 14:01 requirements.txt
 ```
 
 実行環境と学習済みモデルの準備が整いました。
@@ -268,15 +268,14 @@ drwxr-x--- 2 4096 May 14 11:22 metadata
 推論環境のデプロイ例)
 
 ```
-Singularity> mlflow models serve -m MLWFCreateImage_20240514112424/model -p 1234 --env-manager=local &
-[1] 2187622
-Downloading artifacts: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 4152.78it/s]
-2024/05/14 11:34:35 INFO mlflow.models.flavor_backend_registry: Selected backend for flavor 'python_function'
-2024/05/14 11:34:35 INFO mlflow.pyfunc.backend: === Running command 'exec gunicorn --timeout=60 -b 127.0.0.1:1234 -w 1 ${GUNICORN_CMD_ARGS} -- mlflow.pyfunc.scoring_server.wsgi:app'
-[2024-05-14 11:34:35 +0900] [2187647] [INFO] Starting gunicorn 22.0.0
-[2024-05-14 11:34:35 +0900] [2187647] [INFO] Listening at: http://127.0.0.1:1234 (2187647)
-[2024-05-14 11:34:35 +0900] [2187647] [INFO] Using worker: sync
-[2024-05-14 11:34:35 +0900] [2187662] [INFO] Booting worker with pid: 2187662
+Singularity> mlflow models serve -m MLWFCreateImage_20240724161319/model -p 1234 --env-manager=local &
+[1] 2792741
+2024/07/24 16:28:45 INFO mlflow.models.flavor_backend_registry: Selected backend for flavor 'python_function'
+2024/07/24 16:28:45 INFO mlflow.pyfunc.backend: === Running command 'exec gunicorn --timeout=60 -b 127.0.0.1:1234 -w 1 ${GUNICORN_CMD_ARGS} -- mlflow.pyfunc.scoring_server.wsgi:app'
+[2024-07-24 16:28:45 +0900] [2792767] [INFO] Starting gunicorn 22.0.0
+[2024-07-24 16:28:45 +0900] [2792767] [INFO] Listening at: http://127.0.0.1:1234 (2792767)
+[2024-07-24 16:28:45 +0900] [2792767] [INFO] Using worker: sync
+[2024-07-24 16:28:45 +0900] [2792768] [INFO] Booting worker with pid: 2792768
 ```
 
 デプロイしたMLflowのローカル RESTサーバー(http://127.0.0.1:1234/) へサンプルデータを渡し、推論処理を実行できます。以下の例では2パターンのテストデータで、推論結果が出力される事を確認します。predictionsの値が、本サンプルデータセットの目的変数であるワインのqualityを推論した値になっていれば成功です。

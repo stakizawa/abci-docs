@@ -30,7 +30,6 @@ ABCIグループ単位で共有可能なMLflow Tracking Serverの構築とMLWF�
          * ※ 予め[ABCIクラウドストレージ](https://docs.abci.ai/ja/abci-cloudstorage/)でバケットの作成が必要です。
 1. App for MLflow Server画面で作成したTracking Serverの右側にある`Auth Info Registration`ボタンをクリックします。
       * Tracking Serverに、BASIC認証情報が追加されます。
-      * ABCIのCLIから`htpasswd`コマンドを実行して所定の場所に`.htpasswd`ファイルを配置する事も可能です。   
 
 App for MLflow ServerのUIの表示例は以下のとおりです。
 
@@ -45,8 +44,6 @@ ABCI内部に作成済みのMLflow Tracking Serverへのアクセス手順を示
       * ブラウザはChromeを推奨します。  
 1. OnDemandのメニューで`[AI Hub]` - `[MLflow Server]`を選択します。
       * App for MLflow Server画面が表示されます。
-1. App for MLflow Server画面で`Service List Update`ボタンをクリックします。
-      * Tracking Serverの一覧が表示されます。   
 1. Tracking Serverの一覧から対象MLflowコンテナの`URL for access from outside ABCI`をクリックします。
       * BASIC認証用のユーザ名/パスワードの入力ダイアグラムが表示されます。   
 1. BASIC認証用のユーザ名とパスワードを入力します。
@@ -67,8 +64,7 @@ MLWFツールインストール用のPythonの仮想環境(仮想環境名: mlwf
 [username@es1 aihub]$ module load python/3.11
 [username@es1 aihub]$ python3 -m venv venv/mlwf
 [username@es1 aihub]$ source venv/mlwf/bin/activate
-(mlwf) [username@es1 aihub]$ git clone -b AIHub-20230514 https://github.com/aistairc/nedo-ai-MLWF.git
-(mlwf) [username@es1 aihub]$ cp -pr /apps/aihub/source/abci_mlwf .
+(mlwf) [username@es1 aihub]$ cp -pr /apps/aihub/abci_mlwf .
 (mlwf) [username@es1 aihub]$ pip install ./abci_mlwf/
 ```
 
@@ -97,12 +93,12 @@ OndemandでJupyter Appを利用する場合、ABCIの~/venv/jupyter以下にJupy
 
 ```
 [username@es1 ~]$ cd aihub
-[username@es1 aihub]$ cp -pr /apps/aihub/nedo-ai-MLWF/samples/llm_finetune .
+[username@es1 aihub]$ cp -pr /apps/aihub/samples/llm_finetune .
 [username@es1 aihub]$ ls -go llm_finetune/requirements.txt
--rw-r----- 1 86 May 14 13:09 llm_finetune/requirements.txt
+-rw-r--r-- 1 86 Jul 24 17:14 llm_finetune/requirements.txt
 
 [username@es1 aihub]$ ls -go llm_finetune/Cerebras-GPT-590M.ipynb
--rw-r----- 1 20192 May 14 13:09 llm_finetune/Cerebras-GPT-590M.ipynb
+-rw-r--r-- 1 20192 Jul 24 17:14 llm_finetune/Cerebras-GPT-590M.ipynb
 ```
 
 Jupyter Notebook(Jupyter Lab)でMLflowと連携してファインチューニングを行うためのPython仮想環境(仮想環境名: pyfunc3.10)を作成します。
@@ -123,6 +119,8 @@ Jupyter Notebook(Jupyter Lab)でMLflowと連携してファインチューニン
 (pyfunc3.10) [username@es1 aihub]$ python3 -m ipykernel install --user --name pyfunc3.10 --display-name "Python 3.10 (pyfunc)"
 
 (pyfunc3.10) [username@es1 aihub]$ pip install -r llm_finetune/requirements.txt
+
+(pyfunc3.10) [username@es1 aihub]$ pip install --upgrade huggingface-hub==0.23.5
 ```
 
 Open OnDemandのJupyter Notebook(Jupyter Lab)からサンプルプログラムを表示します。
@@ -156,7 +154,7 @@ Open OnDemandのJupyter Notebook(Jupyter Lab)からサンプルプログラム�
 | `MLFLOW_TRACKING_PASSWORD` | ベーシック認証のためのパスワードを設定してください。 | basic_auth_password |
 | `MLFLOW_S3_ENDPOINT_URL` | ABCIクラウドストレージのURLを指定してください。 | https://s3.abci.ai |
 
-### 1.3 LoRAによるファインチューニング実行
+### LoRAによるファインチューニング実行
 
 Jupyter Notebookの各セルを実行してください。    
 Hugging faceからのベースモデル`Cerebras-GPT-590M`をダウンロードし、ファインチューニング用のデータセットとして`kunishou/databricks-dolly-15k-ja`を使用してLoRA（Low Rank Adaptation）によるファインチューニングを実行します。LoRAとはベースモデルに追加のパラメーターを付与し、追加のパラメーターのみを訓練するファインチューニング手法です。  
@@ -172,7 +170,16 @@ Jupyter Notebookの各セルを実行してください。
 ### 学習済みモデルのTracking Serverへの記録
 
 Jupyter Notebookの各セルを実行してください。    
-正常にTracking Serverへの記録が行われた例は以下のとおりです。以下の例では`Model name`が`Cerebras-GPT-590M`、`version`が`6`となります。
+正常にTracking Serverへの記録が行われた出力例は以下のとおりです。以下の例では`Model name`が`Cerebras-GPT-590M`、`version`が`4`となります。
+
+学習処理の実行例)
+
+```
+(snip)
+End: 2024-07-24 17:45:41.137998
+Period: 7.542833
+Created version '4' of model 'Cerebras-GPT-590M'.
+```
 
 ### 学習済みモデルの読み込みと動作確認
 
@@ -209,7 +216,7 @@ Tracking Serverに記録したファインチューニング済みモデルを[A
 (mlwf) [username@es1 aihub]$ export MLFLOW_TRACKING_USERNAME="BASIC_USERNAME"
 (mlwf) [username@es1 aihub]$ export MLFLOW_TRACKING_PASSWORD="BASIC_PASSWORD"
 (mlwf) [username@es1 aihub]$ export MLFLOW_S3_ENDPOINT_URL="https://s3.abci.ai"
-(mlwf) [username@es1 aihub]$ mlwf_export_model --model-registry-url="http://＜コンテナ管理サーバのIPアドレス＞:＜ポート番号＞/mlflow/" --model-name="Cerebras-GPT-590M" --model-version="6" --stacktrace
+(mlwf) [username@es1 aihub]$ mlwf_export_model --model-registry-url="http://＜コンテナ管理サーバのIPアドレス＞:＜ポート番号＞/mlflow/" --model-name="Cerebras-GPT-590M" --model-version="4" --stacktrace
 ```
 | オプション | 説明 |
 |:--|:--|
@@ -223,11 +230,11 @@ Tracking Serverに記録したファインチューニング済みモデルを[A
 抽出したファイルの確認例)
 
 ```
-(mlwf) [username@es1 aihub]$ ls -go MLWFExportModel_20240514135711/
+(mlwf) [username@es1 aihub]$ ls -go MLWFExportModel_20240724174846
 total 49157
-drwxr-x--- 3     4096 May 14 13:57 artifacts
--rw-r----- 1     8206 May 14 13:57 info.yaml
--rw-r----- 1 65880451 May 14 13:57 model.tar.gz
+drwxr-x--- 3     4096 Jul 24 17:48 artifacts
+-rw-r----- 1     8223 Jul 24 17:48 info.yaml
+-rw-r----- 1 65873910 Jul 24 17:48 model.tar.gz
 ```
 
 | 項目 | 説明 |
@@ -250,13 +257,11 @@ ABCIデータセットへの学習済みモデルの登録例)
                            PRE finetune/
                            PRE sklearn_elasticnet_wine/
 
-(mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 cp MLWFExportModel_20240514135711/model.tar.gz s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240514.tar.gz
-upload: MLWFExportModel_20240514135711/model.tar.gz to s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240514.tar.gz
+(mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 cp MLWFExportModel_20240724174846/model.tar.gz s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240724.tar.gz
+upload: MLWFExportModel_20240724174846/model.tar.gz to s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240724.tar.gz
 
-(mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 ls s3://mlwf-examples/Cerebras-GPT-590M-finetue/
-2024-01-05 14:18:09   65871706 model_20240105.tar.gz
-2024-01-24 14:54:58   65876597 model_20240124.tar.gz
-2024-05-14 13:58:36   65880451 model_20240514.tar.gz
+(mlwf) [username@es1 aihub]$ aws --endpoint-url https://s3.abci.ai s3 ls s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240724.tar.gz
+2024-07-24 17:50:35   65873910 model_20240724.tar.gz
 ```
 
 ## 3. モデル利用フェーズ
@@ -274,7 +279,7 @@ Singularityイメージファイルの作成例)
 ```
 [username@es1 ~]$ qrsh -g grpname -l rt_G.small=1 -l h_rt=1:00:00
 [username@g0001 ~]$ cd aihub
-[username@g0001 aihub]$ module load python/3.11 singularitypro/4.1.2
+[username@g0001 aihub]$ module load python/3.11 singularitypro
 [username@g0001 aihub]$ export SINGULARITY_TMPDIR=$SGE_LOCALDIR
 [username@g0001 aihub]$ source venv/mlwf/bin/activate
 
@@ -282,7 +287,7 @@ Singularityイメージファイルの作成例)
 
 (mlwf) [username@g0001 aihub]$ export MLFLOW_S3_ENDPOINT_URL="https://s3.abci.ai"
 
-(mlwf) [username@g0001 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240514.tar.gz --base-container-url docker://pytorch/pytorch:latest
+(mlwf) [username@g0001 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240514.tar.gz --base-container-url docker://nvcr.io/nvidia/cuda:12.5.1-cudnn-devel-ubuntu22.04
 
 (snip)
 
@@ -293,10 +298,7 @@ INFO:    Build complete: ./MLWFCreateImage_20240514141513/container.simg
 | オプション | 説明 |
 |:--|:--|
 | --model-pkg-url | 学習済みモデルパッケージのURLを指定します。ローカルファイルのパスも指定可能です。 |
-| --base-container-url | ベースコンテナイメージのURLを指定します。イメージにはconda環境が必要です。 |
-
-!!! note
-    ベースコンテナイメージにはconda環境が含まれている必要があります。conda環境がない場合はイメージ作成に失敗します。
+| --base-container-url | ベースコンテナイメージのURLを指定します。 |
 
 作成されたSingularityイメージと学習済みモデルパッケージは`MLWFCreateImage_YYYYMMDDhhmmss`ディレクトリ配下に格納されます。  
 以下のとおり確認できます。
@@ -327,8 +329,8 @@ Singularityコンテナの起動例)
 ```
 [username@es1 ~]$ qrsh -g grpname -l rt_G.small=1 -l h_rt=1:00:00
 [username@g0001 ~]$ cd aihub
-[username@g0001 aihub]$ module load singularitypro/4.1.2
-[username@g0001 aihub]$ singularity run --nv MLWFCreateImage_20240514141513/container.simg
+[username@g0001 aihub]$ module load singularitypro
+[username@g0001 aihub]$ singularity shell --nv MLWFCreateImage_20240514141513/container.simg
 ```
 
 `python --version`コマンドや`pip list`コマンドで推論に必要なパッケージがインストールされた実行環境となっている事を確認します。
