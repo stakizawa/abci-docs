@@ -292,7 +292,7 @@ Singularityイメージファイルの作成例)
 (snip)
 
 INFO:    Creating SIF file...
-INFO:    Build complete: ./MLWFCreateImage_20240514141513/container.simg
+INFO:    Build complete: ./MLWFCreateImage_20240724175314/container.simg
 ```
 
 | オプション | 説明 |
@@ -306,12 +306,12 @@ INFO:    Build complete: ./MLWFCreateImage_20240514141513/container.simg
 作成されたSingularityイメージの確認例)
 
 ```
-(mlwf) [username@es1 aihub]$ ls -goh ./MLWFCreateImage_20240514141513/
-total 8.2G
--rwxr-x--- 1 8.2G May 14 14:26 container.simg
--rw-r----- 1  623 May 14 14:15 Dockerfile
-drwxr-x--- 4 4.0K May 14 14:15 model
--rw-r----- 1  683 May 14 14:15 Singularity
+(mlwf) [username@es1 aihub]$ ls -goh ./MLWFCreateImage_20240724175314
+total 9.1G
+-rwxr-x--- 1 9.1G Jul 24 18:01 container.simg
+-rw-r----- 1 1.4K Jul 24 17:53 Dockerfile
+drwxr-x--- 3 4.0K Jul 24 17:53 model
+-rw-r----- 1 1.8K Jul 24 17:53 Singularity
 ```
 
 | 項目 | 説明 |
@@ -330,7 +330,7 @@ Singularityコンテナの起動例)
 [username@es1 ~]$ qrsh -g grpname -l rt_G.small=1 -l h_rt=1:00:00
 [username@g0001 ~]$ cd aihub
 [username@g0001 aihub]$ module load singularitypro
-[username@g0001 aihub]$ singularity shell --nv MLWFCreateImage_20240514141513/container.simg
+[username@g0001 aihub]$ singularity shell --nv MLWFCreateImage_20240724175314/container.simg
 ```
 
 `python --version`コマンドや`pip list`コマンドで推論に必要なパッケージがインストールされた実行環境となっている事を確認します。
@@ -341,21 +341,20 @@ Singularityコンテナの起動例)
 
 ```
 Singularity> python --version
-Python 3.10.13
+Python 3.10.14
 
 Singularity> pip list | grep peft
 peft                      0.5.0
 
-Singularity> lls -go MLWFCreateImage_20240514141513/model/
-total 32
--rw-r----- 1 1057 May 14 13:57 MLmodel
-drwxr-x--- 3 4096 May 14 13:57 artifacts
--rw-r----- 1  220 May 14 13:57 conda.yaml
--rw-r----- 1   64 May 14 13:57 input_example.json
-drwxr-x--- 2 4096 May 14 13:57 metadata
--rw-r----- 1  113 May 14 13:57 python_env.yaml
--rw-r----- 1 2158 May 14 13:57 python_model.pkl
--rw-r----- 1  100 May 14 13:57 requirements.txt
+Singularity> ls -go MLWFCreateImage_20240724175314/model/
+total 28
+-rw-r----- 1 1072 Jul 24 17:48 MLmodel
+drwxr-x--- 3 4096 Jul 24 17:48 artifacts
+-rw-r----- 1  222 Jul 24 17:48 conda.yaml
+-rw-r----- 1   64 Jul 24 17:48 input_example.json
+-rw-r----- 1  115 Jul 24 17:48 python_env.yaml
+-rw-r----- 1 2158 Jul 24 17:48 python_model.pkl
+-rw-r----- 1  100 Jul 24 17:48 requirements.txt
 ```
 
 文章生成プログラム(`generate_text_lora.py`)の入力情報を確認します。  
@@ -376,7 +375,7 @@ Singularity> head -18 llm_finetune/generate_text_lora.py | tail -4
 推論処理の実行例)
 
 ```
-Singularity> python llm_finetune/generate_text_lora.py MLWFCreateImage_20240514141513/model
+Singularity> python llm_finetune/generate_text_lora.py MLWFCreateImage_20240724175314/model
 Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
 What is Large language Models?
 
