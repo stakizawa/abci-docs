@@ -4,9 +4,11 @@
 
 Model Tracking Serviceのサービスの利用方法について、大規模言語モデル(LLM)のファインチューニングを行うシナリオを通しご紹介します。ベースモデルとしてHugging Faceに登録されている[`Cerebras-GPT-590M`](https://huggingface.co/cerebras/Cerebras-GPT-590M)を使用し、ファインチューニング用のデータセットとして[`kunishou/databricks-dolly-15k-ja`](https://huggingface.co/datasets/kunishou/databricks-dolly-15k-ja)を使用します。(ファインチューニングプログラムは、[PCCC AI/機械学習技術部会 第5回ワークショップ「大規模言語モデルハンズオン」](https://github.com/ohtaman/abci-examples/tree/main/202310)用のサンプルプログラムを元に作成しています.)  
 
+機械学習を行う基本シナリオについては[Model Tracking Serviceの利用例(ML編)](./samples-ml-wine.md) をご確認ください。
+
 シナリオは以下のフェーズから構成されます。
 
-   * `0. 事前準備フェーズ`: MLflow Tracking Server作成とMLWFツールのセットアップ
+   * `事前準備フェーズ`: MLflow Tracking Server作成とMLWFツールのセットアップ
    * `1. 学習・ファインチューニングフェーズ`: Tracking Serverと連携しながらABCIシステムでファインチューニング
    * `2. データセット登録・公開フェーズ`: ABCIデータセットへのモデル公開
    * `3. モデル利用フェーズ`: 公開モデルを読み込んで推論処理を実行
@@ -27,13 +29,10 @@ ABCIグループ単位で共有可能なMLflow Tracking Serverの構築とMLWF�
       * App for MLflow Server画面が表示されます。
 1. App for MLflow Server画面で`group_name`などの各項目をdescriptionに従って入力し、`Create Service`ボタンをクリックします。
       * Tracking Serverのコンテナが作成され、Service Listに追加されたTracking Serverの情報が表示されます。
-         * ※ 予め[ABCIクラウドストレージ](https://docs.abci.ai/ja/abci-cloudstorage/)でバケットの作成が必要です。
-1. App for MLflow Server画面で作成したTracking Serverの右側にある`Auth Info Registration`ボタンをクリックします。
-      * Tracking Serverに、BASIC認証情報が追加されます。
-
-App for MLflow ServerのUIの表示例は以下のとおりです。
-
-![App for MLflow Server画面](img/app_for_mlflow_server.png){width=640}
+            * ※ 予め[ABCIクラウドストレージ](https://docs.abci.ai/ja/abci-cloudstorage/)でバケットの作成が必要です。
+1. MLflow Tracking ServerにBasic認証の設定する場合は、サービスの`Auth Info Registration`ボタンをクリックします。
+      * 予め所定の場所に以下のフォーマットのYAMLファイルを配置しておく必要があります。
+            `{'user_name':'＜Basic認証用ユーザ名＞', 'pass':'＜Basic認証用パスワード＞'}`
   
 ### MLflow Tracking Serverの確認
 
@@ -66,6 +65,7 @@ MLWFツールインストール用のPythonの仮想環境(仮想環境名: mlwf
 [username@es1 aihub]$ source venv/mlwf/bin/activate
 (mlwf) [username@es1 aihub]$ cp -pr /apps/aihub/abci_mlwf .
 (mlwf) [username@es1 aihub]$ pip install ./abci_mlwf/
+(mlwf) [username@es1 aihub]$ pip install --upgrade pip
 ```
 
 ### JupyterLab用のPython仮想環境のインストール
@@ -89,19 +89,19 @@ OndemandでJupyter Appを利用する場合、ABCIの~/venv/jupyter以下にJupy
 
 ### ファインチューニングプログラムの準備
 
-サンプルプログラム一式を扱いやすいようコピーして確認します。
+サンプルプログラム一式を扱いやすいようコピーします。
 
 ```
 [username@es1 ~]$ cd aihub
 [username@es1 aihub]$ cp -pr /apps/aihub/samples/llm_finetune .
 [username@es1 aihub]$ ls -go llm_finetune/requirements.txt
--rw-r--r-- 1 86 Jul 24 17:14 llm_finetune/requirements.txt
+-rw-r--r-- 1 94 Jul 25 14:09 llm_finetune/requirements.txt
 
 [username@es1 aihub]$ ls -go llm_finetune/Cerebras-GPT-590M.ipynb
 -rw-r--r-- 1 20192 Jul 24 17:14 llm_finetune/Cerebras-GPT-590M.ipynb
 ```
 
-Jupyter Notebook(Jupyter Lab)でMLflowと連携してファインチューニングを行うためのPython仮想環境(仮想環境名: pyfunc3.10)を作成します。
+Jupyter Notebook(Jupyter Lab)からMLflowを使用してファインチューニングを行うためのPython仮想環境(仮想環境名: pyfunc3.10)を作成します。
    * ipykernelを作成し直す場合は、`$HOME/.local/share/jupyter/kernels/pyfunc3.10`以下のファイルを削除してから実施してください。
 
 ```
@@ -119,8 +119,6 @@ Jupyter Notebook(Jupyter Lab)でMLflowと連携してファインチューニン
 (pyfunc3.10) [username@es1 aihub]$ python3 -m ipykernel install --user --name pyfunc3.10 --display-name "Python 3.10 (pyfunc)"
 
 (pyfunc3.10) [username@es1 aihub]$ pip install -r llm_finetune/requirements.txt
-
-(pyfunc3.10) [username@es1 aihub]$ pip install --upgrade huggingface-hub==0.23.5
 ```
 
 Open OnDemandのJupyter Notebook(Jupyter Lab)からサンプルプログラムを表示します。
@@ -145,7 +143,7 @@ Open OnDemandのJupyter Notebook(Jupyter Lab)からサンプルプログラム�
 
 ### MLflow Tracking Serverとの連携設定
 
-起動したNotebookにおいて`モデルレジストリとの連携設定`から参照している`aihub/llm_finetune/settings.py`を編集し、Tracking ServerとABCIクラウドストレージに関する以下の値を修正し保存します。  
+起動したNotebookにおいて`aihub/llm_finetune/settings.py`を編集し、Tracking ServerとABCIクラウドストレージに関する以下の設定値を修正して保存します。  
 
 | 項目 | 説明 | 入力例 |
 |:--|:--|:--|
@@ -183,7 +181,9 @@ Created version '4' of model 'Cerebras-GPT-590M'.
 
 ### 学習済みモデルの読み込みと動作確認
 
-Jupyter Notebookの各セルを実行してください。  
+Jupyter Notebookの各セルを実行してください。
+
+文章生成テスト結果が出力されれば成功です。
 
 ## 2. データセット登録・公開フェーズ
 
@@ -191,7 +191,7 @@ Tracking Serverに記録したファインチューニング済みモデルを[A
 
 ### 公開対象のモデル確認
 
-[OnDemand](https://ood-portal.abci.ai/)の`[AI Hub]` - `[MLflow Server]`から対象コンテナのURLをクリックし、MLflowのUIへアクセスします。
+[OnDemand](https://ood-portal.abci.ai/)の`[AI Hub]` - `[MLflow Server]`から対象サービスの`URL for access from outside ABC`をクリックし、MLflowのUIを表示します。
 
 1. 画面左側にあるExperimentsの一覧において、`1. 学習・ファインチューニングフェーズ`で記録したモデル名`Cerebras-GPT-590M`を選択します。
       * Runの一覧が表示されます。 
@@ -272,7 +272,7 @@ upload: MLWFExportModel_20240724174846/model.tar.gz to s3://mlwf-examples/Cerebr
 
 ABCIデータセットに登録された学習済みモデルを利用して推論処理を実行するためには、必要なパッケージがインストールされた実行環境を構築する必要があります。コンテナイメージ作成ツール `mlwf_create_image` コマンドを利用することで、第３者が開発したモデルを利用するためのSingularityイメージファイルを作成し、容易に実行環境を構築して推論処理を実行することが可能です。  
 `mlwf_create_image` コマンドでは、`--model-pkg-url`オプションで学習済みモデルパッケージのURLを、`--base-container-url`オプションでベースコンテナイメージを指定します。  
-今回の例ではSingularityイメージファイル作成に12分ほど要します。
+今回の例ではSingularityイメージファイル作成に8分ほど要します。
 
 Singularityイメージファイルの作成例)
 
@@ -287,7 +287,7 @@ Singularityイメージファイルの作成例)
 
 (mlwf) [username@g0001 aihub]$ export MLFLOW_S3_ENDPOINT_URL="https://s3.abci.ai"
 
-(mlwf) [username@g0001 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240514.tar.gz --base-container-url docker://nvcr.io/nvidia/cuda:12.5.1-cudnn-devel-ubuntu22.04
+(mlwf) [username@g0001 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/Cerebras-GPT-590M-finetue/model_20240724.tar.gz --base-container-url docker://nvcr.io/nvidia/cuda:12.5.1-cudnn-devel-ubuntu22.04
 
 (snip)
 
@@ -306,7 +306,7 @@ INFO:    Build complete: ./MLWFCreateImage_20240724175314/container.simg
 作成されたSingularityイメージの確認例)
 
 ```
-(mlwf) [username@es1 aihub]$ ls -goh ./MLWFCreateImage_20240724175314
+(mlwf) [username@g0001 aihub]$ ls -goh ./MLWFCreateImage_20240724175314
 total 9.1G
 -rwxr-x--- 1 9.1G Jul 24 18:01 container.simg
 -rw-r----- 1 1.4K Jul 24 17:53 Dockerfile
@@ -322,13 +322,13 @@ drwxr-x--- 3 4.0K Jul 24 17:53 model
 
 ### 公開モデルを利用した推論
 
-ABCIのインタラクティブジョブを実行し、計算ノードでSingularityイメージファイル`container.simg`を指定しSingularityコンテナを起動します。
+計算ノードでSingularityイメージファイル`container.simg`を指定しSingularityコンテナを起動します。
 
 Singularityコンテナの起動例)
 
 ```
-[username@es1 ~]$ qrsh -g grpname -l rt_G.small=1 -l h_rt=1:00:00
-[username@g0001 ~]$ cd aihub
+(mlwf) [username@g0001 aihub]$ deactivate
+
 [username@g0001 aihub]$ module load singularitypro
 [username@g0001 aihub]$ singularity shell --nv MLWFCreateImage_20240724175314/container.simg
 ```

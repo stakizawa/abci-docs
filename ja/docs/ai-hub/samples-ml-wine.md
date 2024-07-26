@@ -34,6 +34,7 @@ MLWFツールインストール用のPythonの仮想環境(仮想環境名: mlwf
 [username@es1 aihub]$ source venv/mlwf/bin/activate
 (mlwf) [username@es1 aihub]$ cp -pr /apps/aihub/abci_mlwf .
 (mlwf) [username@es1 aihub]$ pip install ./abci_mlwf/
+(mlwf) [username@es1 aihub]$ pip install --upgrade pip
 ```
 
 ## 1. 学習フェーズ
@@ -59,7 +60,7 @@ ABCIのインタラクティブジョブを実行し、計算ノードの利用�
 
 MLflow Tracking Serverを利用するために環境変数を設定します。  
 `MLFLOW_TRACKING_URI`は、App for MLflow Serverの`URL for access from inside ABCI`に表示されている文字列をご指定ください。  
-`MLFLOW_TRACKING_USERNAME`と`MLFLOW_TRACKING_PASSWORD`には、MLflow Tracking Serverのベーシック認証用のものをご指定ください。  
+`MLFLOW_TRACKING_USERNAME`と`MLFLOW_TRACKING_PASSWORD`には、MLflow Tracking Serverのベーシック認証用の文字列をご指定ください。  
 `MLFLOW_S3_ENDPOINT_URL`にはABCIクラウドストレージのURLを指定します。
 
 環境変数の設定例)
@@ -76,7 +77,7 @@ MLflow Tracking Serverを利用するために環境変数を設定します。
 MLflowのサンプルプログラム(mlflow)を`git clone`します。  
 学習プログラム[train.py](https://github.com/mlflow/mlflow/blob/master/examples/sklearn_elasticnet_wine/train.py)を実行し、同時に学習履歴と学習済みモデルをMLflow Tracking Serverに記録します。
 
-以下の例では、train.pyプログラムを2つにパイパーパラメータalphaとl1_ratioを引数に設定し、2度実行しています。出力された`Model name`と`version`を覚えておきます。
+以下の例では、train.pyプログラムの引数に2つのパイパーパラメータalphaとl1_ratioを設定し、2度実行しています。出力された`Model name`と`version`を覚えておきます。
 
 学習処理の実行例)
 
@@ -104,7 +105,7 @@ Created version '33' of model 'ElasticnetWineModel'.
 
 !!! note
     Jupyter Labを使用して学習を行いたい場合は、[Open OnDemand](https://ood-portal.abci.ai/)にログインし、`[Interactive Apps] - [Jupyter Notebook]`から利用が可能です。
-    その場合、サンプルの[train.ipynb](https://github.com/mlflow/mlflow/blob/master/examples/sklearn_elasticnet_wine/train.ipynb)をコピーし、MLFlow Tracking Serverを利用するために環境変数を`mlflow.set_tracking_uri`関数などで同様に指定ください。
+    その場合、サンプルの[train.ipynb](https://github.com/mlflow/mlflow/blob/master/examples/sklearn_elasticnet_wine/train.ipynb)をコピーし、MLFlow Tracking Serverを利用するために環境変数を`mlflow.set_tracking_uri`関数などで同様にご指定ください。
 
 ## 2. データセット登録・公開フェーズ
 
@@ -119,7 +120,7 @@ MLflowのUIの[Experiments]メニューから、Experiments毎やRun毎のハイ
 
 学習処理で作成されたMLflow形式のmodelに対し、登録情報作成支援ツール(`mlwf_export_model`)を使用して登録に必要なファイルを抽出します。
 
-`mlwf_export_model` コマンドでは、`--model-registry-url`オプションで対象コンテナURL(`ポート番号`を含む)を指定します。`--model-name`オプションと`--model-version`オプションで、先ほど確認した対象モデルを指定します。
+`mlwf_export_model` コマンドでは、`--model-registry-url`オプションで対象コンテナURL(`ポート番号`を含む)を指定します。`--model-name`オプションと`--model-version`オプションで、先ほど確認したモデル名とモデルバージョンを指定します。
 
 モデル抽出の実行例)
 
@@ -187,12 +188,12 @@ Singularityイメージファイルの作成例)
 ```
 [username@es1 ~]$ qrsh -g grpname -l rt_C.small=1 -l h_rt=1:00:00
 
-[username@es1 ~]$ cd aihub
-[username@es1 aihub]$ module load python/3.11 singularitypro
-[username@es1 aihub]$ source venv/mlwf/bin/activate
-(mlwf) [username@es1 aihub]$ export PYTHONPATH=${PYTHONPATH}:"mlwf/lib/python3.11":"abci_mlwf"
-(mlwf) [username@es1 aihub]$ export MLFLOW_S3_ENDPOINT_URL="https://s3.abci.ai"
-(mlwf) [username@es1 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/sklearn_elasticnet_wine/model.tar.gz --base-container-url docker://nvcr.io/nvidia/cuda:12.5.1-cudnn-devel-ubuntu22.04
+[username@g0001 ~]$ cd aihub
+[username@g0001 aihub]$ module load python/3.11 singularitypro
+[username@g0001 aihub]$ source venv/mlwf/bin/activate
+(mlwf) [username@g0001 aihub]$ export PYTHONPATH=${PYTHONPATH}:"mlwf/lib/python3.11":"abci_mlwf"
+(mlwf) [username@g0001 aihub]$ export MLFLOW_S3_ENDPOINT_URL="https://s3.abci.ai"
+(mlwf) [username@g0001 aihub]$ mlwf_create_image --model-pkg-url s3://mlwf-examples/sklearn_elasticnet_wine/model.tar.gz --base-container-url docker://nvcr.io/nvidia/cuda:12.5.1-cudnn-devel-ubuntu22.04
 
 (snip)
 
@@ -211,7 +212,7 @@ INFO:    Build complete: ./MLWFCreateImage_20240724161319/container.simg
 作成されたSingularityイメージの確認例)
 
 ```
-(mlwf) [username@es1 aihub]$ ls -goh MLWFCreateImage_20240724161319/
+(mlwf) [username@g0001 aihub]$ ls -goh MLWFCreateImage_20240724161319/
 total 7.9G
 -rwxr-x--- 1 4.8G Jul 24 16:20 container.simg
 -rw-r----- 1 1.4K Jul 24 16:13 Dockerfile
@@ -227,14 +228,12 @@ drwxr-x--- 2 4.0K Jul 24 16:13 model
 
 ### 公開モデルを利用した推論
 
-ABCIのインタラクティブジョブを実行し、計算ノードでイメージファイル`container.simg`を指定しSingularityコンテナを起動します。
+計算ノードでイメージファイル`container.simg`を指定しSingularityコンテナを起動します。
 
 Singularityコンテナの起動例)
 
 ```
-[username@es1 ~]$ qrsh -g grpname -l rt_C.small=1 -l h_rt=1:00:00
-
-[username@g0001 ~]$ cd aihub
+(mlwf) [username@g0001 aihub]$ deactivate
 [username@g0001 aihub]$ module load singularitypro
 [username@g0001 aihub]$ singularity shell MLWFCreateImage_20240724161319/container.simg
 ```
