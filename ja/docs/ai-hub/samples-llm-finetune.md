@@ -17,16 +17,18 @@ Model Tracking Serviceのサービスの利用方法について、大規模言�
 
 ABCIグループ単位で共有可能なMLflow Tracking Serverの構築とMLWFツールのセットアップ等を行います。
 
-### MLflow Serverの作成
+### MLflow Serverの作成と確認
 
 `App for MLflow Server`を使用し、ABCI内部向けにABCIグループ単位で共有可能なMLflow Tracking Serverを作成(配備)します。
-既にMLflow Tracking Serverを作成されている場合は`MLflow Tracking Serverの確認`へ進んでください。  
 
 1. ブラウザで[OnDemand](https://ood-portal.abci.ai/)にアクセスします。
       * ABCIアカウントでログインします。OTPの入力も必要です。
       * ブラウザはChromeを推奨します。 
 1. OnDemandのメニューで`[AI Hub]` - `[MLflow Server]` を選択します。
-      * App for MLflow Server画面が表示されます。
+    * App for MLflow Serverを起動すると、以下のような画面が表示されます。
+
+![App for MLflow Server画面](img/app_for_mlflow_server.png){width=640}
+
 1. App for MLflow Server画面で`group_name`などの各項目をdescriptionに従って入力し、`Create Service`ボタンをクリックします。
       * Tracking Serverのコンテナが作成され、Service Listに追加されたTracking Serverの情報が表示されます。
             * ※ 予め[ABCIクラウドストレージ](https://docs.abci.ai/ja/abci-cloudstorage/)でバケットの作成が必要です。
@@ -34,23 +36,13 @@ ABCIグループ単位で共有可能なMLflow Tracking Serverの構築とMLWF�
       * 予め所定の場所に以下のフォーマットのYAMLファイルを配置しておく必要があります。
             `{'user_name':'＜Basic認証用ユーザ名＞', 'pass':'＜Basic認証用パスワード＞'}`
   
-### MLflow Tracking Serverの確認
-
-ABCI内部に作成済みのMLflow Tracking Serverへのアクセス手順を示します。
-
-1. ブラウザで[OnDemand](https://ood-portal.abci.ai/)にアクセスします。
-      * ABCIアカウントでログインします。OTPの入力も必要です。
-      * ブラウザはChromeを推奨します。  
-1. OnDemandのメニューで`[AI Hub]` - `[MLflow Server]`を選択します。
-      * App for MLflow Server画面が表示されます。
 1. Tracking Serverの一覧から対象MLflowコンテナの`URL for access from outside ABCI`をクリックします。
       * BASIC認証用のユーザ名/パスワードの入力ダイアグラムが表示されます。   
 1. BASIC認証用のユーザ名とパスワードを入力します。
-      * MLflowのUIが表示されます。
 1. MLflowのUIを確認します。  
       * MLflowのUIの表示例は以下のとおりです。  
 
-![App for MLflow Server画面](img/app_for_mlflow_server.png){width=640}
+![MLflow画面例](img/mlflow01.png){width=640}
 
 ### MLWFツールのインストール
 
@@ -140,6 +132,10 @@ Open OnDemandのJupyter Notebook(Jupyter Lab)からサンプルプログラム�
       * ファインチューニング用のNotebook`Cerebras-GPT-590M.ipynb`が起動されます。
 1. Jupyterメニューの`[kernel]`-`[Change Kernel]`を選択し、Select Kernelで`Python 3.10 (pyfunc)`を選択します
       * Jupyter Labの画面右上のカーネル表示欄で`Python 3.10 (pyfunc)`が選択された状態になります。  
+
+Jupyter Notebook(Jupyter Lab)の表示例は以下のとおりです。
+
+![Jupyter Lab画面例](img/jupyter01.png){width=640}
 
 ### MLflow Tracking Serverとの連携設定
 
@@ -266,7 +262,7 @@ upload: MLWFExportModel_20240724174846/model.tar.gz to s3://mlwf-examples/Cerebr
 
 ## 3. モデル利用フェーズ
 
-学習済みモデルをABCIデータセットから取得し、実行環境をSingularityコンテナを用いて再現した上で推論処理(文章生成)を実行します。
+学習済みモデルをABCIデータセットから取得し、ABCIで実行環境をSingularityコンテナを用いて再現した上で推論(文章生成)を実行します。
 
 ### Singularityイメージファイルの作成
 

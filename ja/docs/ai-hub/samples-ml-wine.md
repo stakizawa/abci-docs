@@ -15,11 +15,17 @@ ABCIグループ単位で共有利用できるMLflow Serverが作成済みであ
 1. [OnDemand](https://ood-portal.abci.ai/)にアクセスします。
     * ABCIアカウントでログインします。OTPの入力も必要です。 
 1. `[AI Hub]` - `[MLflow Server]` を選択します。
-1. 対象ServiceのURL(from outside ABCI)をクリックします。
+    * App for MLflow Serverを起動すると、以下のような画面が表示されます。
+
+![App for MLflow Server画面](img/app_for_mlflow_server.png){width=640}
+
+1. Tracking Serverの一覧から対象MLflowコンテナの`URL for access from outside ABCI`をクリックします。
+      * BASIC認証用のユーザ名/パスワードの入力ダイアグラムが表示されます。   
 1. BASIC認証用のユーザ名とパスワードを入力します。
-1. MLflowのUIを確認します。
-  
-  * ※ ブラウザはChromeを推奨します。
+1. MLflowのUIを確認します。  
+      * MLflowのUIの表示例は以下のとおりです。  
+
+![MLflow画面例](img/mlflow01.png){width=640}
 
 ### MLWFツールのインストール
 
