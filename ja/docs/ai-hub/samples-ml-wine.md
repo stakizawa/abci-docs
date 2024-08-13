@@ -186,7 +186,7 @@ upload: MLWFExportModel_20240724140146/model.tar.gz to s3://mlwf-examples/sklear
 
 ### Singularityイメージファイルの作成
 
-ABCIデータセットに登録された学習済みモデルを実行するためには、必要なパッケージがインストールされた実行環境を構築する必要があります。コンテナイメージ作成ツール `mlwf_create_image` コマンドを利用することで、第３者が開発したモデルを実行できるSingularityイメージファイルを用いて容易に実行環境を構築し、推論処理を実行することが可能です。  
+ABCIデータセットに登録された学習済みモデルを実行するためには、必要なパッケージがインストールされた実行環境を構築する必要があります。コンテナイメージ作成ツール `mlwf_create_image` コマンドを利用することで、第３者が開発したモデルを実行できるSingularityイメージファイルを用いて容易に実行環境を構築し、推論を実行することが可能です。  
 `mlwf_create_image` コマンドでは、`--model-pkg-url`オプションで学習済みモデルパッケージのURLを、`--base-container-url`オプションでベースコンテナイメージを指定します。`mlwf_create_image` コマンドは、今回の例ではコンテナイメージ作成に8分ほど要します。
 
 Singularityイメージファイルの作成例)
@@ -283,9 +283,9 @@ Singularity> mlflow models serve -m MLWFCreateImage_20240724161319/model -p 1234
 [2024-07-24 16:28:45 +0900] [2792768] [INFO] Booting worker with pid: 2792768
 ```
 
-デプロイしたMLflowのローカル RESTサーバー(http://127.0.0.1:1234/) へサンプルデータを渡し、推論処理を実行できます。以下の例では2パターンのテストデータで、推論結果が出力される事を確認します。predictionsの値が、本サンプルデータセットの目的変数であるワインのqualityを推論した値になっていれば成功です。
+デプロイしたMLflowのローカル RESTサーバー(http://127.0.0.1:1234/) へサンプルデータを渡し、推論を実行できます。以下の例では2パターンのテストデータで、推論結果が出力される事を確認します。predictionsの値が、本サンプルデータセットの目的変数であるワインのqualityを推論した値になっていれば成功です。
 
-推論処理の実行例)
+推論の実行例)
 
 ```
 Singularity> curl -X POST -H "Content-Type:application/json" --data '{"dataframe_split": {"columns":["fixed acidity", "volatile acidity", "citric acid", "residual sugar", "chlorides", "free sulfur dioxide", "total sulfur dioxide", "density", "pH", "sulphates", "alcohol"],"data":[[6.2, 0.66, 0.48, 1.2, 0.029, 29, 75, 0.98, 3.33, 0.39, 12.8]]}}' http://127.0.0.1:1234/invocations

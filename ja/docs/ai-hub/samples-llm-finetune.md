@@ -11,7 +11,7 @@ Model Tracking Serviceのサービスの利用方法について、大規模言�
    * `事前準備フェーズ`: MLflow Tracking Server作成とMLWFツールのセットアップ
    * `1. 学習・ファインチューニングフェーズ`: Tracking Serverと連携しながらABCIシステムでファインチューニング
    * `2. データセット登録・公開フェーズ`: ABCIデータセットへのモデル公開
-   * `3. モデル利用フェーズ`: 公開モデルを読み込んで推論処理を実行
+   * `3. モデル利用フェーズ`: 公開モデルを読み込んで推論(文章生成)を実行
 
 ## 事前準備フェーズ
 
@@ -31,10 +31,10 @@ ABCIグループ単位で共有可能なMLflow Tracking Serverの構築とMLWF�
 
 1. App for MLflow Server画面で`group_name`などの各項目をdescriptionに従って入力し、`Create Service`ボタンをクリックします。
       * Tracking Serverのコンテナが作成され、Service Listに追加されたTracking Serverの情報が表示されます。
-            * ※ 予め[ABCIクラウドストレージ](https://docs.abci.ai/ja/abci-cloudstorage/)でバケットの作成が必要です。
+      * 予め[ABCIクラウドストレージ](https://docs.abci.ai/ja/abci-cloudstorage/)でバケットの作成が必要です。
 1. MLflow Tracking ServerにBasic認証の設定する場合は、サービスの`Auth Info Registration`ボタンをクリックします。
       * 予め所定の場所に以下のフォーマットのYAMLファイルを配置しておく必要があります。
-            `{'user_name':'＜Basic認証用ユーザ名＞', 'pass':'＜Basic認証用パスワード＞'}`
+      * `{'user_name':'＜Basic認証用ユーザ名＞', 'pass':'＜Basic認証用パスワード＞'}`
   
 1. Tracking Serverの一覧から対象MLflowコンテナの`URL for access from outside ABCI`をクリックします。
       * BASIC認証用のユーザ名/パスワードの入力ダイアグラムが表示されます。   
@@ -62,7 +62,7 @@ MLWFツールインストール用のPythonの仮想環境(仮想環境名: mlwf
 
 ### JupyterLab用のPython仮想環境のインストール
 
-OndemandでJupyter Appを利用する場合、ABCIの~/venv/jupyter以下にJupyterLabのPython仮想環境(仮想環境名: jupyter)を構築されていることが前提となっています。  
+OnDemandでJupyter Appを利用する場合、ABCIの~/venv/jupyter以下にJupyterLabのPython仮想環境(仮想環境名: jupyter)を構築されていることが前提となっています。  
 以下の手順で、JupyterLabをインストールします。
 
 ```
@@ -159,7 +159,7 @@ Hugging faceからのベースモデル`Cerebras-GPT-590M`をダウンロード�
 
 Jupyter Notebookの各セルを実行してください。   
 大規模言語モデルをMLflowのインターフェースで記録して利用可能にするために、[カスタムPyFunc](https://mlflow.org/docs/latest/llms/custom-pyfunc-for-llms/index.html)を使用(`mlflow.pyfunc.PythonModel`を継承したクラスを定義)します。
-このPythonのクラスでは、モデルの読み込み処理を`load_context関数`で、推論処理を`predict関数`で実装します。ベースモデルをHugging Faceからロードし、訓練済みのPEFTモデルをTracking Serverから読み込み重みを追加し、推論する処理を実装しています。 
+このPythonのクラスでは、モデルの読み込み処理を`load_context関数`で、推論を`predict関数`で実装します。ベースモデルをHugging Faceからロードし、訓練済みのPEFTモデルをTracking Serverから読み込み重みを追加し、推論する処理を実装しています。 
 
 ### 学習済みモデルのTracking Serverへの記録
 
@@ -262,11 +262,11 @@ upload: MLWFExportModel_20240724174846/model.tar.gz to s3://mlwf-examples/Cerebr
 
 ## 3. モデル利用フェーズ
 
-学習済みモデルをABCIデータセットから取得し、ABCIで実行環境をSingularityコンテナを用いて再現した上で推論(文章生成)を実行します。
+学習済みモデルをABCIデータセットから取得し、ABCIで実行環境をSingularityコンテナイメージを用いて再現した上で推論(文章生成)を実行します。
 
 ### Singularityイメージファイルの作成
 
-ABCIデータセットに登録された学習済みモデルを利用して推論処理を実行するためには、必要なパッケージがインストールされた実行環境を構築する必要があります。コンテナイメージ作成ツール `mlwf_create_image` コマンドを利用することで、第３者が開発したモデルを利用するためのSingularityイメージファイルを作成し、容易に実行環境を構築して推論処理を実行することが可能です。  
+ABCIデータセットに登録された学習済みモデルを利用して推論を実行するためには、必要なパッケージがインストールされた実行環境を構築する必要があります。コンテナイメージ作成ツール `mlwf_create_image` コマンドを利用することで、第３者が開発したモデルを利用するためのSingularityイメージファイルを作成し、容易に実行環境を構築して推論を実行することが可能です。  
 `mlwf_create_image` コマンドでは、`--model-pkg-url`オプションで学習済みモデルパッケージのURLを、`--base-container-url`オプションでベースコンテナイメージを指定します。  
 今回の例ではSingularityイメージファイル作成に8分ほど要します。
 
@@ -368,7 +368,7 @@ Singularity> head -18 llm_finetune/generate_text_lora.py | tail -4
 文章生成プログラムを実行します。第１引数として`モデルが格納されたパス`を指定します。  
 以下の例に示すように要求した文章が生成されたら成功です。(本シナリオに用いているのは小規模なモデルであり、生成される文章の内容自体は正確ではない場合があります。)
 
-推論処理の実行例)
+推論の実行例)
 
 ```
 Singularity> python llm_finetune/generate_text_lora.py MLWFCreateImage_20240724175314/model

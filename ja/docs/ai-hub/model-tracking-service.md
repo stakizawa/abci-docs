@@ -1,8 +1,8 @@
-# Model tracking service
+# Model Tracking Service
 
-ABCIシステムで汎用学習済みモデルの共有・再利用を容易に行えるよう、Model Tracking Serviceを提供します。Model Tracking Serviceは、ABCIグループ単位でMLflow Tracking Serverをデプロイし管理できる`App for MLflow Server`と学習モデル公開や実行環境構築を支援するツールセットから構成されます。[ABCI Datasets](https://datasets.abci.ai/)と連携させて利用が可能です。そのイメージ図を以下に示します。
+ABCIシステムで汎用学習済みモデルの共有・再利用を容易に行えるよう、Model Tracking Serviceを提供します。Model Tracking Serviceは、ABCIグループ単位でMLflow Tracking Serverをデプロイし管理できる[`App for MLflow Server`](https://docs.abci.ai/ja/open-ondemand/aihub/)と学習モデル公開や実行環境構築を支援するツールセットから構成されます。[ABCI Datasets](https://datasets.abci.ai/)と連携させて利用が可能です。そのイメージ図を以下に示します。
 
-![Model tracking serviceイメージ](img/Model_Tracking_Service.jpg){width=640}
+![Model Tracking Serviceイメージ](img/Model_Tracking_Service.jpg){width=640}
 
 Model Tracking Serviceを理解するための各種サンプルコードを配置しています。
 
